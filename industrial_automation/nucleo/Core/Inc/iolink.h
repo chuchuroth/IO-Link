@@ -43,6 +43,24 @@
 #define IOLINK_STATUS_OPEN     (0x02u)   /* Bit 1: jaws fully open   */
 
 /* --------------------------------------------------------------------------
+ * SPI command bytes (RPi5 → Nucleo)
+ *
+ * Defined here (not in main.h) so they survive CubeMX code regeneration,
+ * which overwrites main.h but never touches iolink.h.
+ * -------------------------------------------------------------------------- */
+#define CMD_GRIP     (0x01u)
+#define CMD_RELEASE  (0x02u)
+#define CMD_STATUS   (0x03u)
+
+/* --------------------------------------------------------------------------
+ * SPI response bytes (Nucleo → RPi5)
+ * -------------------------------------------------------------------------- */
+#define RSP_IDLE      (0x00u)
+#define RSP_GRIPPING  (0x01u)
+#define RSP_RELEASING (0x02u)
+#define RSP_ERROR     (0xFFu)
+
+/* --------------------------------------------------------------------------
  * API
  * -------------------------------------------------------------------------- */
 

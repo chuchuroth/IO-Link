@@ -20,19 +20,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-/* --------------------------------------------------------------------------
- * SPI command bytes (RPi5 → Nucleo)
- * -------------------------------------------------------------------------- */
-#define CMD_GRIP     (0x01u)
-#define CMD_RELEASE  (0x02u)
-#define CMD_STATUS   (0x03u)
-
-/* --------------------------------------------------------------------------
- * SPI response bytes (Nucleo → RPi5)
- * -------------------------------------------------------------------------- */
-#define RSP_IDLE      (0x00u)
-#define RSP_GRIPPING  (0x01u)
-#define RSP_RELEASING (0x02u)
-#define RSP_ERROR     (0xFFu)
+/* CMD_* and RSP_* constants are defined in iolink.h to survive CubeMX
+ * regeneration of this file. Include iolink.h wherever they are needed. */
 
 #endif /* MAIN_H */

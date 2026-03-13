@@ -157,10 +157,11 @@ int iolink_cycle(uint8_t pd_out, uint8_t *pd_in)
         uint8_t echo[3];
         HAL_UART_Receive(&huart4, echo, 3, 3);   /* discard; ignore return value */
 
-        /* Clear overrun, framing, and noise error flags (STM32F7 ICR) */
+        /* Clear overrun, framing, and noise error flags (STM32F7 ICR).
+         * Note: noise flag macro is USART_ICR_NCF on STM32F7 (not NECF). */
         huart4.Instance->ICR = USART_ICR_ORECF
                              | USART_ICR_FECF
-                             | USART_ICR_NECF;
+                             | USART_ICR_NCF;
 
         /* Reset HAL RX state in case an error left it in a locked state */
         huart4.RxState = HAL_UART_STATE_READY;
