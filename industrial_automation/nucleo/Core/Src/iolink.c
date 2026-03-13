@@ -141,7 +141,33 @@ int iolink_cycle(uint8_t pd_out, uint8_t *pd_in)
     }
 
     /* ------------------------------------------------------------------ */
-    /* 3. Receive D-sequence: [PDin][CKT_D]  (EN=0 → receiver active)    */
+    /* 3. Flush TX echo bytes from the UART RX path.                      */
+    /*                                                                    */
+    /* The TIOL221EVM echoes the C/Q line back on DOUT regardless of the  */
+    /* EN pin state, so all 3 TX bytes (MC, PDout, CKT_M) accumulate in   */
+    /* the UART RX register while EN is HIGH. If not discarded here,      */
+    /* HAL_UART_Receive below reads the echo instead of the device reply.  */
+    /*                                                                    */
+    /* Drain up to 3 bytes with a tight 3 ms window (3 bytes at 38400    */
+    /* baud = ~0.78 ms, so they are already in the RDR by now). Then      */
+    /* clear all UART error flags and reset the HAL RX state so the next  */
+    /* HAL_UART_Receive starts clean.                                     */
+    /* ------------------------------------------------------------------ */
+    {
+        uint8_t echo[3];
+        HAL_UART_Receive(&huart4, echo, 3, 3);   /* discard; ignore return value */
+
+        /* Clear overrun, framing, and noise error flags (STM32F7 ICR) */
+        huart4.Instance->ICR = USART_ICR_ORECF
+                             | USART_ICR_FECF
+                             | USART_ICR_NECF;
+
+        /* Reset HAL RX state in case an error left it in a locked state */
+        huart4.RxState = HAL_UART_STATE_READY;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* 4. Receive D-sequence: [PDin][CKT_D]  (EN=0 → receiver active)    */
     /* ------------------------------------------------------------------ */
     uint8_t rx[2] = { 0x00, 0x00 };
     st = HAL_UART_Receive(&huart4, rx, 2, UART_RX_TIMEOUT_MS);
