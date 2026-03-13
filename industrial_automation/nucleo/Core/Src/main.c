@@ -37,9 +37,10 @@ UART_HandleTypeDef huart4;
 /* --------------------------------------------------------------------------
  * Application state
  * -------------------------------------------------------------------------- */
-static volatile uint8_t spi_rx_byte = 0x00;   /* command received from RPi5 */
-static volatile uint8_t spi_tx_byte = RSP_IDLE; /* response pre-loaded for RPi5 */
-static volatile uint8_t new_cmd_flag = 0;      /* set in ISR, cleared in main loop */
+static volatile uint8_t spi_rx_byte   = 0x00;    /* command received from RPi5 */
+static volatile uint8_t spi_tx_byte   = RSP_IDLE; /* response pre-loaded for RPi5 */
+static volatile uint8_t new_cmd_flag  = 0;        /* set in ISR, cleared in main loop */
+static          uint8_t gripper_state = RSP_IDLE;  /* last confirmed gripper state */
 
 /* --------------------------------------------------------------------------
  * Forward declarations for CubeMX-generated init functions
@@ -131,43 +132,25 @@ int main(void)
         /* ---- GRIP command ------------------------------------------- */
         case CMD_GRIP:
             iol_rc = iolink_cycle(IOLINK_PD_GRIP, &pd_in);
-            if (iol_rc == IOLINK_OK) {
-                /* Report GRIPPING; the RPi5 polls status next cycle */
-                spi_tx_byte = RSP_GRIPPING;
-            } else {
-                spi_tx_byte = RSP_ERROR;
-            }
+            gripper_state = (iol_rc == IOLINK_OK) ? RSP_GRIPPING : RSP_ERROR;
+            spi_tx_byte   = gripper_state;
             break;
 
         /* ---- RELEASE command ---------------------------------------- */
         case CMD_RELEASE:
             iol_rc = iolink_cycle(IOLINK_PD_RELEASE, &pd_in);
-            if (iol_rc == IOLINK_OK) {
-                spi_tx_byte = RSP_RELEASING;
-            } else {
-                spi_tx_byte = RSP_ERROR;
-            }
+            gripper_state = (iol_rc == IOLINK_OK) ? RSP_RELEASING : RSP_ERROR;
+            spi_tx_byte   = gripper_state;
             break;
 
         /* ---- STATUS request ----------------------------------------- */
         case CMD_STATUS:
             /*
-             * Run a read cycle (send current PDout, read device status).
-             * We re-use whatever the last pd_out was; here we send 0x00
-             * (no-op / keep state) and just read back the device status.
+             * Return the last confirmed gripper state without running a
+             * new IO-Link cycle.  This avoids overwriting the state with
+             * raw PDin bits whose mapping is device-specific.
              */
-            iol_rc = iolink_cycle(IOLINK_PD_RELEASE, &pd_in);
-            if (iol_rc != IOLINK_OK) {
-                spi_tx_byte = RSP_ERROR;
-                break;
-            }
-            if (pd_in & IOLINK_STATUS_GRIPPED) {
-                spi_tx_byte = RSP_GRIPPING;
-            } else if (pd_in & IOLINK_STATUS_OPEN) {
-                spi_tx_byte = RSP_RELEASING;
-            } else {
-                spi_tx_byte = RSP_IDLE;
-            }
+            spi_tx_byte = gripper_state;
             break;
 
         default:
