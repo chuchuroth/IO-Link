@@ -127,25 +127,23 @@ int main(void)
 
         switch (cmd)
         {
+        /* ---- PING: no IO-Link, just echo 0x55 ----------------------- */
+        case 0xAA:
+            spi_tx_byte = 0x55;
+            break;
+
         /* ---- GRIP command ------------------------------------------- */
         case CMD_GRIP:
-            iol_rc = iolink_cycle(IOLINK_PD_GRIP, &pd_in);
-            if (iol_rc == IOLINK_OK) {
-                /* Report GRIPPING; the RPi5 polls status next cycle */
-                spi_tx_byte = RSP_GRIPPING;
-            } else {
-                spi_tx_byte = RSP_ERROR;
-            }
+            spi_tx_byte = RSP_GRIPPING;   /* DIAG: bypass iolink_cycle */
+            /* iol_rc = iolink_cycle(IOLINK_PD_GRIP, &pd_in);
+            spi_tx_byte = (iol_rc == IOLINK_OK) ? RSP_GRIPPING : RSP_ERROR; */
             break;
 
         /* ---- RELEASE command ---------------------------------------- */
         case CMD_RELEASE:
-            iol_rc = iolink_cycle(IOLINK_PD_RELEASE, &pd_in);
-            if (iol_rc == IOLINK_OK) {
-                spi_tx_byte = RSP_RELEASING;
-            } else {
-                spi_tx_byte = RSP_ERROR;
-            }
+            spi_tx_byte = RSP_RELEASING;  /* DIAG: bypass iolink_cycle */
+            /* iol_rc = iolink_cycle(IOLINK_PD_RELEASE, &pd_in);
+            spi_tx_byte = (iol_rc == IOLINK_OK) ? RSP_RELEASING : RSP_ERROR; */
             break;
 
         /* ---- STATUS request ----------------------------------------- */
