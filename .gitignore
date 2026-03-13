@@ -5,3 +5,4 @@ __pycache__/
 
 # Logs
 *.log
+industrial_automation/nucleo/industrial_automation_nucleo/Core/Src/main.c
