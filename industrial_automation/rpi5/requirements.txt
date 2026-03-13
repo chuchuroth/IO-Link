@@ -1,0 +1,5 @@
+# Raspberry Pi 5 — runtime dependencies
+# Install with: pip3 install -r requirements.txt
+
+RPi.GPIO>=0.7.1
+spidev>=3.6
