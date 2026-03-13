@@ -23,4 +23,7 @@
 /* CMD_* and RSP_* constants are defined in iolink.h to survive CubeMX
  * regeneration of this file. Include iolink.h wherever they are needed. */
 
+/* Required by stm32f7xx_hal_msp.c and other HAL files */
+void Error_Handler(void);
+
 #endif /* MAIN_H */

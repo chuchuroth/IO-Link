@@ -276,3 +276,13 @@ static void MX_USART4_UART_Init(void)
     huart4.Init.OverSampling = UART_OVERSAMPLING_16;
     HAL_UART_Init(&huart4);
 }
+
+/**
+ * @brief  Error handler — called by HAL on assertion failures.
+ *         Disables interrupts and halts so a debugger can inspect state.
+ */
+void Error_Handler(void)
+{
+    __disable_irq();
+    while (1) { }
+}
