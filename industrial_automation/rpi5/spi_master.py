@@ -46,10 +46,12 @@ SPI_MODE        = 0       # CPOL=0, CPHA=0
 # Delay after asserting CS before transfer (µs → s)
 _SETUP_DELAY_S = 0.000010   # 10 µs — give Nucleo SPI slave time to prepare
 
-# Time to wait after sending a command for the Nucleo to complete one IO-Link
-# cycle (echo-flush + device response at 38400 baud, worst-case 10 ms HAL
-# timeout + HAL overhead → use 20 ms).
-_IOLINK_CYCLE_S = 0.020
+# Time to wait after sending a command for the Nucleo to complete one full
+# iolink_exchange() call.  The firmware runs 16 TYPE_2_V M-sequence pages;
+# each page has three UART calls with HAL timeouts (10 ms TX + 3 ms echo-flush
+# + 20 ms RX = 33 ms/page worst-case when no device is responding).
+# 16 pages × 33 ms = 528 ms worst-case → use 700 ms to be safe.
+_IOLINK_CYCLE_S = 0.700
 
 
 class SPIMaster:

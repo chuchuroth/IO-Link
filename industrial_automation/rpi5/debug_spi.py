@@ -36,8 +36,8 @@ SPI_SPEED     = 1_000_000
 SPI_MODE      = 0
 
 SETUP_DELAY   = 0.000010   # 10 µs inter-transfer setup delay
-IOLINK_CYCLE  = 0.020      # 20 ms: covers worst-case IO-Link timeout (10 ms HAL
-                            # timeout + echo-flush + HAL overhead)
+IOLINK_CYCLE  = 0.700      # 700 ms: firmware runs 16 TYPE_2_V M-sequence pages;
+                            # worst-case 16 × (10 ms TX + 3 ms echo + 20 ms RX) = 528 ms
 
 # --------------------------------------------------------------------------- #
 # Protocol constants (must match Nucleo app.c / iolink.h)
@@ -125,7 +125,7 @@ def stage3_grip(spi: spidev.SpiDev) -> int:
     print("\n" + "="*60)
     print("STAGE 3: CMD_GRIP with double-transfer (fixed protocol)")
     print("="*60)
-    print("  Sending CMD_GRIP, sleeping 20ms for IO-Link cycle, reading result.")
+    print("  Sending CMD_GRIP, sleeping 700ms for full IO-Link exchange (16 pages), reading result.")
     result = send_cmd(spi, CMD_GRIP, "CMD_GRIP")
     if result == RSP_GRIPPING:
         print("  ✓ GRIP accepted — IO-Link cycle to gripper succeeded.")
